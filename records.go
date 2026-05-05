@@ -52,6 +52,10 @@ const (
 	ChangeTypeReplace ChangeType = "REPLACE"
 	// ChangeTypeDelete represents the DELETE change type
 	ChangeTypeDelete ChangeType = "DELETE"
+	// ChangeTypeExtend represents the EXTEND change type (requires PowerDNS Authoritative Server 4.9.12 / 5.0.2+)
+	ChangeTypeExtend ChangeType = "EXTEND"
+	// ChangeTypePrune represents the PRUNE change type (requires PowerDNS Authoritative Server 4.9.12 / 5.0.2+)
+	ChangeTypePrune ChangeType = "PRUNE"
 )
 
 // RRType represents a string-valued resource record type
@@ -203,6 +207,38 @@ func (r *RecordsService) Delete(ctx context.Context, domain string, name string,
 	rrset.Name = &name
 	rrset.Type = &recordType
 	rrset.ChangeType = ChangeTypePtr(ChangeTypeDelete)
+
+	payload := r.prepareRRSet(rrset)
+	return r.patchRRSet(ctx, domain, payload)
+}
+
+// Extend appends records to an existing resource record set without replacing it.
+// Requires PowerDNS Authoritative Server 4.9.12 / 5.0.2+.
+func (r *RecordsService) Extend(ctx context.Context, domain string, name string, recordType RRType, content []string) error {
+	rrset := new(RRset)
+	rrset.Name = &name
+	rrset.Type = &recordType
+	rrset.ChangeType = ChangeTypePtr(ChangeTypeExtend)
+	rrset.Records = make([]Record, len(content))
+	for i, c := range content {
+		rrset.Records[i] = Record{Content: String(c), Disabled: Bool(false), SetPTR: Bool(false)}
+	}
+
+	payload := r.prepareRRSet(rrset)
+	return r.patchRRSet(ctx, domain, payload)
+}
+
+// Prune removes specific records from an existing resource record set without deleting the entire set.
+// Requires PowerDNS Authoritative Server 4.9.12 / 5.0.2+.
+func (r *RecordsService) Prune(ctx context.Context, domain string, name string, recordType RRType, content []string) error {
+	rrset := new(RRset)
+	rrset.Name = &name
+	rrset.Type = &recordType
+	rrset.ChangeType = ChangeTypePtr(ChangeTypePrune)
+	rrset.Records = make([]Record, len(content))
+	for i, c := range content {
+		rrset.Records[i] = Record{Content: String(c)}
+	}
 
 	payload := r.prepareRRSet(rrset)
 	return r.patchRRSet(ctx, domain, payload)

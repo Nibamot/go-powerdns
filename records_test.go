@@ -67,7 +67,7 @@ func generateTestRecord(client *Client, domain string, autoAddRecord bool, recor
 }
 
 func validateChangeType(changeType ChangeType) error {
-	matched, err := regexp.MatchString(`^(REPLACE|DELETE)$`, string(changeType))
+	matched, err := regexp.MatchString(`^(REPLACE|DELETE|EXTEND|PRUNE)$`, string(changeType))
 	if matched == false || err != nil {
 		return &Error{}
 	}
@@ -553,5 +553,53 @@ func TestPatchRRSets(t *testing.T) {
 
 	if err := p.Records.Patch(context.Background(), testDomain, &rrSets); err != nil {
 		t.Errorf("%s", err)
+	}
+}
+
+func TestExtendRecord(t *testing.T) {
+	testDomain := generateNativeZone(true)
+
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	p := initialisePowerDNSTestClient()
+	testRecordName := generateTestRecord(p, testDomain, true, testRecordTXT)
+	registerRecordMockResponder(testDomain, testRecordName)
+	if err := p.Records.Extend(context.Background(), testDomain, testRecordName, RRTypeTXT, []string{"\"additional\""}); err != nil {
+		t.Errorf("%s", err)
+	}
+}
+
+func TestExtendRecordError(t *testing.T) {
+	p := initialisePowerDNSTestClient()
+	p.BaseURL = "://"
+	testDomain := generateNativeZone(false)
+	testRecordName := generateTestRecord(p, testDomain, false, testRecordTXT)
+	if err := p.Records.Extend(context.Background(), testDomain, testRecordName, RRTypeTXT, []string{"\"additional\""}); err == nil {
+		t.Error("error is nil")
+	}
+}
+
+func TestPruneRecord(t *testing.T) {
+	testDomain := generateNativeZone(true)
+
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	p := initialisePowerDNSTestClient()
+	testRecordName := generateTestRecord(p, testDomain, true, testRecordTXT)
+	registerRecordMockResponder(testDomain, testRecordName)
+	if err := p.Records.Prune(context.Background(), testDomain, testRecordName, RRTypeTXT, []string{testTXTRecord}); err != nil {
+		t.Errorf("%s", err)
+	}
+}
+
+func TestPruneRecordError(t *testing.T) {
+	p := initialisePowerDNSTestClient()
+	p.BaseURL = "://"
+	testDomain := generateNativeZone(false)
+	testRecordName := generateTestRecord(p, testDomain, false, testRecordTXT)
+	if err := p.Records.Prune(context.Background(), testDomain, testRecordName, RRTypeTXT, []string{testTXTRecord}); err == nil {
+		t.Error("error is nil")
 	}
 }
