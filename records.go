@@ -214,10 +214,11 @@ func (r *RecordsService) Delete(ctx context.Context, domain string, name string,
 
 // Extend appends records to an existing resource record set without replacing it.
 // Requires PowerDNS Authoritative Server 4.9.12 / 5.0.2+.
-func (r *RecordsService) Extend(ctx context.Context, domain string, name string, recordType RRType, content []string) error {
+func (r *RecordsService) Extend(ctx context.Context, domain string, name string, recordType RRType, ttl uint32, content []string) error {
 	rrset := new(RRset)
 	rrset.Name = &name
 	rrset.Type = &recordType
+	rrset.TTL = &ttl
 	rrset.ChangeType = ChangeTypePtr(ChangeTypeExtend)
 	rrset.Records = make([]Record, len(content))
 	for i, c := range content {
@@ -230,10 +231,11 @@ func (r *RecordsService) Extend(ctx context.Context, domain string, name string,
 
 // Prune removes specific records from an existing resource record set without deleting the entire set.
 // Requires PowerDNS Authoritative Server 4.9.12 / 5.0.2+.
-func (r *RecordsService) Prune(ctx context.Context, domain string, name string, recordType RRType, content []string) error {
+func (r *RecordsService) Prune(ctx context.Context, domain string, name string, recordType RRType, ttl uint32, content []string) error {
 	rrset := new(RRset)
 	rrset.Name = &name
 	rrset.Type = &recordType
+	rrset.TTL = &ttl
 	rrset.ChangeType = ChangeTypePtr(ChangeTypePrune)
 	rrset.Records = make([]Record, len(content))
 	for i, c := range content {

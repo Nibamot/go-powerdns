@@ -565,7 +565,7 @@ func TestExtendRecord(t *testing.T) {
 	p := initialisePowerDNSTestClient()
 	testRecordName := generateTestRecord(p, testDomain, true, testRecordTXT)
 	registerRecordMockResponder(testDomain, testRecordName)
-	if err := p.Records.Extend(context.Background(), testDomain, testRecordName, RRTypeTXT, []string{"\"additional\""}); err != nil {
+	if err := p.Records.Extend(context.Background(), testDomain, testRecordName, RRTypeTXT, 300, []string{"\"additional\""}); err != nil {
 		t.Errorf("%s", err)
 	}
 }
@@ -575,7 +575,7 @@ func TestExtendRecordError(t *testing.T) {
 	p.BaseURL = "://"
 	testDomain := generateNativeZone(false)
 	testRecordName := generateTestRecord(p, testDomain, false, testRecordTXT)
-	if err := p.Records.Extend(context.Background(), testDomain, testRecordName, RRTypeTXT, []string{"\"additional\""}); err == nil {
+	if err := p.Records.Extend(context.Background(), testDomain, testRecordName, RRTypeTXT, 300, []string{"\"additional\""}); err == nil {
 		t.Error("error is nil")
 	}
 }
@@ -589,7 +589,7 @@ func TestPruneRecord(t *testing.T) {
 	p := initialisePowerDNSTestClient()
 	testRecordName := generateTestRecord(p, testDomain, true, testRecordTXT)
 	registerRecordMockResponder(testDomain, testRecordName)
-	if err := p.Records.Prune(context.Background(), testDomain, testRecordName, RRTypeTXT, []string{testTXTRecord}); err != nil {
+	if err := p.Records.Prune(context.Background(), testDomain, testRecordName, RRTypeTXT, 300, []string{testTXTRecord}); err != nil {
 		t.Errorf("%s", err)
 	}
 }
@@ -599,7 +599,7 @@ func TestPruneRecordError(t *testing.T) {
 	p.BaseURL = "://"
 	testDomain := generateNativeZone(false)
 	testRecordName := generateTestRecord(p, testDomain, false, testRecordTXT)
-	if err := p.Records.Prune(context.Background(), testDomain, testRecordName, RRTypeTXT, []string{testTXTRecord}); err == nil {
+	if err := p.Records.Prune(context.Background(), testDomain, testRecordName, RRTypeTXT, 300, []string{testTXTRecord}); err == nil {
 		t.Error("error is nil")
 	}
 }
