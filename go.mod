@@ -1,4 +1,4 @@
-module github.com/joeig/go-powerdns/v3
+module github.com/Nibamot/go-powerdns/v3
 
 go 1.22.7
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/joeig/go-powerdns/v3"
+	"github.com/Nibamot/go-powerdns/v3"
 )
 
 func ExampleZonesService_AddNative() {
